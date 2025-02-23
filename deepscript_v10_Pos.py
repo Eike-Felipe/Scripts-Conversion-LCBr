@@ -2,6 +2,7 @@ import json
 import os
 import re
 from collections import OrderedDict
+import sys  # para imprimir na mesma linha
 
 # Diretórios
 localization_dir = "Localize"  # Diretório de entrada
@@ -23,6 +24,15 @@ def replace_eikefelipe(key):
         if match:
             return "-1", match.group(1)  # Retorna (id, campo_corrigido)
     return None, None  # Mantém o key original
+
+# Contar o total de arquivos JSON
+total_files = 0
+for root, dirs, files in os.walk(localization_dir):
+    for f in files:
+        if f.endswith(".json"):
+            total_files += 1
+
+processed_files = 0  # Contador de arquivos processados
 
 # Percorrer todos os arquivos na pasta Localize
 for dirpath, dirnames, filenames in os.walk(localization_dir):
@@ -79,13 +89,21 @@ for dirpath, dirnames, filenames in os.walk(localization_dir):
             # Converter para lista e ordenar
             output_list = []
             for key in grouped_items:
-                if isinstance(key, int) or (isinstance(key, str) and not key.startswith("-1-")):
+                if isinstance(key, int) or (isinstance(key, str)):
                     output_list.append(grouped_items[key])
-            # Adicionar grupos -1 no final para manter a ordem
-            for key in grouped_items:
-                if isinstance(key, str) and key.startswith("-1-"):
-                    output_list.append(grouped_items[key])
-            
+           
             # Salvar o arquivo
             with open(output_path, "w", encoding="utf-8") as output_file:
                 json.dump({"dataList": output_list}, output_file, ensure_ascii=False, indent=4)
+
+            # Atualizar contador e exibir barra de progresso
+            processed_files += 1
+            progress = processed_files / total_files
+            bar_length = 40
+            filled_length = int(bar_length * progress)
+            bar = '█' * filled_length + '-' * (bar_length - filled_length)
+            sys.stdout.write(f'\rProgresso: |{bar}| {processed_files}/{total_files}')
+            sys.stdout.flush()
+
+# Garantir pular para nova linha ao final
+print()
