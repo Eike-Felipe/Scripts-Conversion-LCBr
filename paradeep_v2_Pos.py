@@ -115,6 +115,7 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
             localization_list = []
 
             for i, en_item in enumerate(en_list):
+                item_id = en_item.get("id", i)  # Define item_id
                 cn_item = cn_dict.get(i, {})
                 jp_item = jp_dict.get(i, {})
                 kr_item = kr_dict.get(i, {})
