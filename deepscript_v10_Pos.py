@@ -25,6 +25,21 @@ def replace_eikefelipe(key):
             return "-1", match.group(1)  # Retorna (id, campo_corrigido)
     return None, None  # Mantém o key original
 
+def format_item(item, is_story_data):
+    """
+    Formata o ID como número ou string com base nas regras:
+    1. Se for StoryData, o ID é sempre número.
+    2. Se não for StoryData e tiver apenas um elemento além do 'id', o ID é string.
+    """
+    id_value = item["id"]
+    
+    if is_story_data and isinstance(id_value, int):
+        item["id"] = int(id_value)  # Garante que seja um número
+    elif not is_story_data and isinstance(id_value, int) and len(item) == 2:
+        item["id"] = str(id_value)  # Converte para string (aspas no JSON)
+    
+    return item
+
 # Contar o total de arquivos JSON
 total_files = 0
 for root, dirs, files in os.walk(localization_dir):
@@ -46,6 +61,9 @@ for dirpath, dirnames, filenames in os.walk(localization_dir):
             
             grouped_items = OrderedDict()  # Agrupa por ID, mantendo a ordem
             current_group = None  # Rastreia o grupo -1 atual
+            
+            # Verificar se o arquivo está no diretório StoryData
+            is_story_data = "StoryData" in dirpath
             
             with open(loc_path, encoding="utf-8") as loc_file:
                 localization_list = json.load(loc_file)
@@ -89,8 +107,10 @@ for dirpath, dirnames, filenames in os.walk(localization_dir):
             # Converter para lista e ordenar
             output_list = []
             for key in grouped_items:
-                if isinstance(key, int) or (isinstance(key, str)):
-                    output_list.append(grouped_items[key])
+                item = grouped_items[key]
+                # Aplicar formatação do ID
+                item = format_item(item, is_story_data)
+                output_list.append(item)
            
             # Salvar o arquivo
             with open(output_path, "w", encoding="utf-8") as output_file:
