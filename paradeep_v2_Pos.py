@@ -7,6 +7,7 @@ cn_dir = "CN"
 jp_dir = "JP"
 kr_dir = "KR"
 es_dir = "ES"
+br_dir = "BR"
 localization_dir = "Localize"
 
 # Contador para IDs -1
@@ -35,6 +36,7 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
             jp_path = os.path.join(jp_dir, rel_path)
             kr_path = os.path.join(kr_dir, rel_path)
             es_path = os.path.join(es_dir, rel_path)
+            br_path = os.path.join(br_dir, rel_path)
             loc_path = os.path.join(localization_dir, rel_path)
 
             # Criar diretório de saída se não existir
@@ -46,6 +48,7 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
             jp_list = []
             kr_list = []
             es_list = []
+            br_list = []
 
             # Ler o arquivo EN
             if os.path.exists(en_path):
@@ -80,11 +83,18 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
                     es_data = json.load(es_file)
                     es_list = es_data.get("dataList", [])
 
+            # Ler o arquivo BR se existir
+            if os.path.exists(br_path):
+                with open(br_path, encoding="utf-8") as br_file:
+                    br_data = json.load(br_file)
+                    br_list = br_data.get("dataList", [])
+
             # Criar dicionários por ID para acesso rápido
             cn_dict = {item["id"]: item for item in cn_list if "id" in item}
             jp_dict = {item["id"]: item for item in jp_list if "id" in item}
             kr_dict = {item["id"]: item for item in kr_list if "id" in item}
             es_dict = {item["id"]: item for item in es_list if "id" in item}
+            br_dict = {item["id"]: item for item in br_list if "id" in item}
 
             localization_list = []
 
@@ -98,6 +108,7 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
                 jp_item = jp_dict.get(item_id, {})
                 kr_item = kr_dict.get(item_id, {})
                 es_item = es_dict.get(item_id, {})
+                br_item = br_dict.get(item_id, {})
 
                 for key in en_item:
                     if key == "id":
@@ -113,7 +124,8 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
                         f"KR : \n{kr_item.get(key, '')}\n\n"
                         f"JP : \n{jp_item.get(key, '')}\n\n"
                         f"CN : \n{cn_item.get(key, '')}\n\n"
-                        f"ES : \n{es_item.get(key, '')}"
+                        f"ES : \n{es_item.get(key, '')}\n\n"
+                        f"BR : \n{br_item.get(key, '')}"
                     )
 
                     localization_item = {
