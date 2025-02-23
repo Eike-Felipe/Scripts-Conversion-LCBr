@@ -1,5 +1,7 @@
+from collections import OrderedDict
 import json
 import os
+import sys
 
 # Diretórios
 en_dir = "EN"
@@ -24,6 +26,20 @@ def replace_negative_id(key, eikefelipe_counter):
         eikefelipe_counter += 1
         return new_key, eikefelipe_counter
     return key, eikefelipe_counter
+
+# Adicionar função para exibir a barra de progresso sem bibliotecas
+def print_progress(current, total, bar_length=40):
+    percent = current / total if total else 0
+    filled_length = int(round(bar_length * percent))
+    bar = '=' * filled_length + '-' * (bar_length - filled_length)
+    sys.stdout.write(f'\rProgresso: |{bar}| {int(percent*100)}%')
+    sys.stdout.flush()
+ 
+# Configurar barra de progresso: contar total de arquivos JSON na pasta EN
+total_files = sum(
+    1 for root, _, files in os.walk(en_dir) for file in files if file.endswith(".json")
+)
+file_counter = 0
 
 # Percorrer recursivamente todos os arquivos na pasta EN
 for dirpath, dirnames, filenames in os.walk(en_dir):
@@ -90,25 +106,20 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
                     br_list = br_data.get("dataList", [])
 
             # Criar dicionários por ID para acesso rápido
-            cn_dict = {item["id"]: item for item in cn_list if "id" in item}
-            jp_dict = {item["id"]: item for item in jp_list if "id" in item}
-            kr_dict = {item["id"]: item for item in kr_list if "id" in item}
-            es_dict = {item["id"]: item for item in es_list if "id" in item}
-            br_dict = {item["id"]: item for item in br_list if "id" in item}
+            cn_dict = {i: item for i, item in enumerate(cn_list)}
+            jp_dict = {i: item for i, item in enumerate(jp_list)}
+            kr_dict = {i: item for i, item in enumerate(kr_list)}
+            es_dict = {i: item for i, item in enumerate(es_list)}
+            br_dict = {i: item for i, item in enumerate(br_list)}
 
             localization_list = []
 
-            for en_item in en_list:
-                # Verificar se en_item possui 'id'
-                if "id" not in en_item:
-                    continue
-
-                item_id = en_item["id"]
-                cn_item = cn_dict.get(item_id, {})
-                jp_item = jp_dict.get(item_id, {})
-                kr_item = kr_dict.get(item_id, {})
-                es_item = es_dict.get(item_id, {})
-                br_item = br_dict.get(item_id, {})
+            for i, en_item in enumerate(en_list):
+                cn_item = cn_dict.get(i, {})
+                jp_item = jp_dict.get(i, {})
+                kr_item = kr_dict.get(i, {})
+                es_item = es_dict.get(i, {})
+                br_item = br_dict.get(i, {})
 
                 for key in en_item:
                     if key == "id":
@@ -144,3 +155,8 @@ for dirpath, dirnames, filenames in os.walk(en_dir):
                     ensure_ascii=False,
                     indent=4,
                 )
+                # Atualizar barra de progresso
+            file_counter += 1
+            print_progress(file_counter, total_files)
+# Linha em branco para finalizar a barra de progresso
+print()
