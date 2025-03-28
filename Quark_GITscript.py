@@ -25,15 +25,18 @@ def replace_eikefelipe(key):
             return "-1", match.group(1)  # Retorna (id, campo_corrigido)
     return None, None  # Mantém o key original
 
-def format_item(item, is_story_data):
+def format_item(item, is_story_data, filename=""):
     """
     Formata o ID como número ou string com base nas regras:
     1. Se for StoryData, o ID é sempre número.
     2. Se não for StoryData e tiver apenas um elemento além do 'id', o ID é string.
+    3. Se o arquivo começar com BgmLyrics_C, o ID é sempre string.
     """
     id_value = item["id"]
     
-    if is_story_data and isinstance(id_value, int):
+    if filename.startswith("BgmLyrics_C") and isinstance(id_value, int):
+        item["id"] = str(id_value)  # Garante que seja string para arquivos BgmLyrics_C
+    elif is_story_data and isinstance(id_value, int):
         item["id"] = int(id_value)  # Garante que seja um número
     elif not is_story_data and isinstance(id_value, int) and len(item) == 2:
         item["id"] = str(id_value)  # Converte para string (aspas no JSON)
@@ -109,7 +112,7 @@ for dirpath, dirnames, filenames in os.walk(localization_dir):
             for key in grouped_items:
                 item = grouped_items[key]
                 # Aplicar formatação do ID
-                item = format_item(item, is_story_data)
+                item = format_item(item, is_story_data, filename)
                 output_list.append(item)
            
             # Salvar o arquivo
