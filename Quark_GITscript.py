@@ -31,6 +31,7 @@ def format_item(item, is_story_data, filename=""):
     1. Se for StoryData, o ID é sempre número.
     2. Se o arquivo estiver na lista de arquivos específicos, o ID é sempre string.
     3. Se o arquivo estiver na pasta BgmLyrics, o ID é sempre número (exceto os arquivos específicos).
+    4. Se algum elemento do conjunto (exceto id) possuir um valor constituído apenas de números, ele será convertido para inteiro.
     """
     id_value = item["id"]
     
@@ -56,6 +57,11 @@ def format_item(item, is_story_data, filename=""):
             item["id"] = int(str(id_value))
         except ValueError:
             pass
+    
+    # Nova regra: converte valores numéricos em campos (exceto id) para inteiros
+    for key, value in item.items():
+        if key != "id" and isinstance(value, str) and value.isdigit():
+            item[key] = int(value)
     
     return item
 
