@@ -29,8 +29,8 @@ def format_item(item, is_story_data, filename=""):
     """
     Formata o ID como número ou string com base nas regras:
     1. Se for StoryData, o ID é sempre número.
-    2. Se não for StoryData e tiver apenas um elemento além do 'id', o ID é string.
-    3. Se o arquivo estiver na lista de arquivos específicos, o ID é sempre string.
+    2. Se o arquivo estiver na lista de arquivos específicos, o ID é sempre string.
+    3. Se o arquivo estiver na pasta BgmLyrics, o ID é sempre número (exceto os arquivos específicos).
     """
     id_value = item["id"]
     
@@ -43,12 +43,19 @@ def format_item(item, is_story_data, filename=""):
         "BgmLyrics_Cromer2.json"
     ]
     
+    # Verifica se o arquivo está na pasta BgmLyrics
+    is_bgm_lyrics = "BgmLyrics" in filename
+    
     if filename in string_id_files and isinstance(id_value, int):
         item["id"] = str(id_value)  # Garante que seja string para arquivos específicos
     elif is_story_data and isinstance(id_value, int):
         item["id"] = int(id_value)  # Garante que seja um número
-    elif not is_story_data and isinstance(id_value, int) and len(item) == 2:
-        item["id"] = str(id_value)  # Converte para string (aspas no JSON)
+    elif is_bgm_lyrics and isinstance(id_value, (int, str)):
+        # Converte para número se estiver na pasta BgmLyrics (exceto arquivos específicos)
+        try:
+            item["id"] = int(str(id_value))
+        except ValueError:
+            pass
     
     return item
 
